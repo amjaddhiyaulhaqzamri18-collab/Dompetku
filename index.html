@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dompetku - Tracker Keuangan & Tabungan</title>
+    <!-- Menghubungkan file CSS eksternal -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <header class="header">
+        <h1>💰 Dompetku</h1>
+        <p>Catat otomatis pemasukan, pengeluaran, dan target tabungan Anda.</p>
+      </header>
+
+      <hr class="divider" />
+
+      <!-- Ringkasan Finansial (Dashboard) -->
+      <section class="dashboard">
+        <div class="card card-pemasukan">
+          <span class="card-title">Total Pemasukan</span>
+          <p id="total-pemasukan" class="card-value text-green">Rp 0</p>
+        </div>
+        <div class="card card-pengeluaran">
+          <span class="card-title">Total Pengeluaran</span>
+          <p id="total-pengeluaran" class="card-value text-red">Rp 0</p>
+        </div>
+        <div class="card card-saldo">
+          <span class="card-title">Sisa Saldo Tabungan</span>
+          <p id="sisa-saldo" class="card-value text-indigo">Rp 0</p>
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <!-- Form Input Transaksi -->
+      <section class="form-container">
+        <h2>Tambah Transaksi Baru</h2>
+        <form id="form-transaksi" class="form-grid">
+          <div class="form-group">
+            <label>Deskripsi</label>
+            <input
+              type="text"
+              id="deskripsi"
+              placeholder="Contoh: Gaji Bulanan, Beli Bakso"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label>Jumlah (Rp)</label>
+            <input type="number" id="jumlah" placeholder="0" required />
+          </div>
+          <div class="form-group">
+            <label>Jenis</label>
+            <select id="jenis">
+              <option value="pemasukan">📈 Pemasukan</option>
+              <option value="pengeluaran">📉 Pengeluaran</option>
+            </select>
+          </div>
+          <div class="form-group button-group">
+            <button type="submit" class="btn-submit">Simpan</button>
+          </div>
+        </form>
+      </section>
+
+      <hr class="divider" />
+
+      <!-- Riwayat Transaksi -->
+      <section class="table-container">
+        <h2>Riwayat Transaksi</h2>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Deskripsi</th>
+                <th>Jenis</th>
+                <th class="text-right">Jumlah</th>
+                <th class="text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="daftar-transaksi">
+              <!-- Data otomatis muncul di sini via JavaScript -->
+            </tbody>
+          </table>
+        </div>
+        <p id="pesan-kosong" class="text-center text-muted hidden">
+          Belum ada transaksi.
+        </p>
+      </section>
+    </div>
+
+    <!-- Menghubungkan file JavaScript eksternal -->
+    <script src="script.js"></script>
+  </body>
+</html>
