@@ -1,98 +1,89 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dompetku - Tracker Keuangan & Tabungan</title>
-    <!-- Menghubungkan file CSS eksternal -->
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
-    <div class="container">
-      <!-- Header -->
-      <header class="header">
-        <h1>💰 CATATAN KEUANGAN</h1>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dompetku - Catatan Keuangan</title>
+    <!-- Menghubungkan ke file CSS external -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Library untuk Grafik Diagram -->
+    <script src="https://jsdelivr.net"></script>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h2>💰 CATATAN KEUANGAN</h2>
         <p>Catat otomatis pemasukan, pengeluaran, dan target tabungan Anda.</p>
-      </header>
-
-      <hr class="divider" />
-
-      <!-- Ringkasan Finansial (Dashboard) -->
-      <section class="dashboard">
-        <div class="card card-pemasukan">
-          <span class="card-title">Total Pemasukan</span>
-          <p id="total-pemasukan" class="card-value text-green">Rp 0</p>
-        </div>
-        <div class="card card-pengeluaran">
-          <span class="card-title">Total Pengeluaran</span>
-          <p id="total-pengeluaran" class="card-value text-red">Rp 0</p>
-        </div>
-        <div class="card card-saldo">
-          <span class="card-title">Sisa Saldo Tabungan</span>
-          <p id="sisa-saldo" class="card-value text-indigo">Rp 0</p>
-        </div>
-      </section>
-
-      <hr class="divider" />
-
-      <!-- Form Input Transaksi -->
-      <section class="form-container">
-        <h2>Tambah Transaksi Baru</h2>
-        <form id="form-transaksi" class="form-grid">
-          <div class="form-group">
-            <label>Deskripsi</label>
-            <input
-              type="text"
-              id="deskripsi"
-              placeholder="Contoh: Gaji Bulanan, Beli Bakso"
-              required
-            />
-          </div>
-          <div class="form-group">
-            <label>Jumlah (Rp)</label>
-            <input type="number" id="jumlah" placeholder="0" required />
-          </div>
-          <div class="form-group">
-            <label>Jenis</label>
-            <select id="jenis">
-              <option value="pemasukan">📈 Pemasukan</option>
-              <option value="pengeluaran">📉 Pengeluaran</option>
-            </select>
-          </div>
-          <div class="form-group button-group">
-            <button type="submit" class="btn-submit">Simpan</button>
-          </div>
-        </form>
-      </section>
-
-      <hr class="divider" />
-
-      <!-- Riwayat Transaksi -->
-      <section class="table-container">
-        <h2>Riwayat Transaksi</h2>
-        <div class="table-scroll">
-          <table>
-            <thead>
-              <tr>
-                <th>tanggal</th>
-                <th>Deskripsi</th>
-                <th>Jenis</th>
-                <th class="text-right">Jumlah</th>
-                <th class="text-center">Aksi</th>
-              </tr>
-            </thead>
-            <tbody id="daftar-transaksi">
-              <!-- Data otomatis muncul di sini via JavaScript -->
-            </tbody>
-          </table>
-        </div>
-        <p id="pesan-kosong" class="text-center text-muted hidden">
-          Belum ada transaksi.
-        </p>
-      </section>
     </div>
 
-    <!-- Menghubungkan file JavaScript eksternal -->
-    <script src="script.js"></script>
-  </body>
+    <!-- Info Keuangan Utama -->
+    <div class="card card-income">
+        <div class="card-title">Total Pemasukan</div>
+        <div class="card-value text-income" id="total-income">Rp 0</div>
+    </div>
+    <div class="card card-expense">
+        <div class="card-title">Total Pengeluaran</div>
+        <div class="card-value text-expense" id="total-expense">Rp 0</div>
+    </div>
+    <div class="card card-balance">
+        <div class="card-title">Sisa Saldo Tabungan</div>
+        <div class="card-value text-balance" id="balance">Rp 0</div>
+    </div>
+
+    <!-- Target Tabungan -->
+    <div class="goal-container">
+        <div class="goal-header">
+            <span>🎯 Target Tabungan</span>
+            <span id="goal-percent">0%</span>
+        </div>
+        <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="goal-progress"></div>
+        </div>
+        <div class="flex-group" style="margin-top: 10px;">
+            <input type="number" id="goal-input" placeholder="Set target rupiah (cth: 1000000)" style="flex:1; padding:6px 10px; font-size:12px;">
+            <button type="button" onclick="setGoal()" style="padding:6px 12px; font-size:12px; background:var(--warning)">Simpan</button>
+        </div>
+    </div>
+
+    <!-- Grafik Struktur Pengeluaran -->
+    <div class="chart-container" id="chart-wrapper">
+        <canvas id="expenseChart"></canvas>
+    </div>
+
+    <!-- Formulir Tambah Transaksi -->
+    <div class="section-title">Tambah Transaksi Baru</div>
+    <form id="trans-form">
+        <input type="text" id="desc" placeholder="Deskripsi (Contoh: Gaji Bulanan, Beli Bakso)" required>
+        <div class="flex-group">
+            <input type="number" id="amount" placeholder="Jumlah (RP)" style="flex: 1;" required>
+            <select id="type" style="width: 120px;">
+                <option value="income">Masuk (+)</option>
+                <option value="expense">Keluar (-)</option>
+            </select>
+        </div>
+        <select id="category">
+            <option value="Umum">Kategori: Umum / Lainnya</option>
+            <option value="Gaji/Bonus">Pemasukan: Gaji / Bonus</option>
+            <option value="Makanan">Pengeluaran: Makanan & Minuman</option>
+            <option value="Transportasi">Pengeluaran: Transportasi</option>
+            <option value="Belanja">Pengeluaran: Belanja / Hiburan</option>
+            <option value="Tagihan">Pengeluaran: Tagihan / Pulsa</option>
+        </select>
+        <button type="submit">Simpan Transaksi</button>
+    </form>
+
+    <!-- Filter Bulanan -->
+    <div class="section-title">Riwayat Transaksi</div>
+    <select id="filter-month" class="filter-select" onchange="updateApp()">
+        <option value="all">Semua Waktu</option>
+    </select>
+
+    <!-- Riwayat List -->
+    <ul id="trans-list"></ul>
+</div>
+
+<!-- Menghubungkan ke file JavaScript external -->
+<script src="script.js"></script>
+</body>
 </html>
