@@ -1,125 +1,150 @@
-:root {
-    --primary: #4f46e5;
-    --success: #10b981;
-    --danger: #ef4444;
-    --warning: #f59e0b;
-    --bg: #f8fafc;
-    --white: #ffffff;
-    --text: #1e293b;
-}
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: var(--bg);
-    margin: 0;
-    padding: 16px;
-    color: var(--text);
-    display: flex;
-    justify-content: center;
-}
-.container {
-    width: 100%;
-    max-width: 480px;
-    background: var(--white);
-    padding: 20px;
-    border-radius: 24px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.03);
-}
-.header {
-    text-align: center;
-    margin-bottom: 24px;
-}
-.header h2 {
-    margin: 0;
-    color: var(--primary);
-    font-size: 26px;
-    letter-spacing: 0.5px;
-}
-.header p {
-    color: #64748b;
-    font-size: 13px;
-    margin: 4px 0 0 0;
-}
-.card {
-    background: white;
-    border-radius: 16px;
-    padding: 16px;
-    margin-bottom: 16px;
-    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-    border-left: 5px solid #ccc;
-}
-.card-income { border-left-color: var(--success); }
-.card-expense { border-left-color: var(--danger); }
-.card-balance { border-left-color: var(--primary); }
+// Ikat DOM Element
+const form = document.getElementById("transaction-form");
+const descInput = document.getElementById("description");
+const amountInput = document.getElementById("amount");
+const typeInput = document.getElementById("type");
+const categoryInput = document.getElementById("category");
 
-.card-title { font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: 600; }
-.card-value { font-size: 24px; font-weight: 700; margin-top: 4px; }
-.text-income { color: var(--success); }
-.text-expense { color: var(--danger); }
-.text-balance { color: var(--primary); }
+const totalIncomeEl = document.getElementById("total-income");
+const totalExpenseEl = document.getElementById("total-expense");
+const balanceEl = document.getElementById("balance");
+const listContainer = document.getElementById("transaction-list");
+const clearAllBtn = document.getElementById("clear-all");
 
-.goal-container {
-    background: #f1f5f9;
-    padding: 16px;
-    border-radius: 16px;
-    margin-bottom: 20px;
-}
-.goal-header { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; }
-.progress-bar-bg {
-    background: #e2e8f0;
-    height: 10px;
-    border-radius: 5px;
-    margin-top: 8px;
-    overflow: hidden;
-}
-.progress-bar-fill {
-    background: var(--warning);
-    height: 100%;
-    width: 0%;
-    transition: width 0.4s ease;
+// Target Elements
+const targetAmountInput = document.getElementById("target-amount-input");
+const saveTargetBtn = document.getElementById("save-target-btn");
+const targetPercentageEl = document.getElementById("target-percentage");
+const targetProgressEl = document.getElementById("target-progress");
+
+// State Data (Local Storage)
+let transactions = JSON.parse(localStorage.getItem("transactions")) || [];
+let targetSaving = parseFloat(localStorage.getItem("targetSaving")) || 0;
+
+function formatRupiah(angka) {
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+  }).format(angka);
 }
 
-.section-title { font-size: 16px; font-weight: 700; margin: 24px 0 12px 0; }
-.flex-group { display: flex; gap: 8px; }
-form { display: flex; flex-direction: column; gap: 10px; }
-input, select, button {
-    padding: 12px;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    font-size: 14px;
-    outline: none;
-}
-input:focus, select:focus { border-color: var(--primary); }
-button {
-    background: var(--primary);
-    color: white;
-    border: none;
-    font-weight: 600;
-    cursor: pointer;
+// Update Dashboard Angka Utama dan Bar Target Progress
+function updateDashboard() {
+  let totalIncome = 0;
+  let totalExpense = 0;
+
+  transactions.forEach((trx) => {
+    if (trx.type === "income") {
+      totalIncome += trx.amount;
+    } else {
+      totalExpense += trx.amount;
+    }
+  });
+
+  const currentBalance = totalIncome - totalExpense;
+
+  totalIncomeEl.textContent = formatRupiah(totalIncome);
+  totalExpenseEl.textContent = formatRupiah(totalExpense);
+  balanceEl.textContent = formatRupiah(currentBalance);
+
+  // Hitung Persentase Target Tabungan dari Sisa Saldo saat ini
+  if (targetSaving > 0 && currentBalance > 0) {
+    let pct = Math.min(Math.round((currentBalance / targetSaving) * 100), 100);
+    targetPercentageEl.textContent = pct + "%";
+    targetProgressEl.style.width = pct + "%";
+  } else {
+    targetPercentageEl.textContent = "0%";
+    targetProgressEl.style.width = "0%";
+  }
 }
 
-.chart-container { max-width: 100%; margin: 16px 0; display: none; }
+// Render isi list tabel bawah
+function renderList() {
+  listContainer.innerHTML = "";
 
-.filter-select { width: 100%; margin-bottom: 12px; background: #fff; }
-ul { list-style: none; padding: 0; margin: 0; max-height: 250px; overflow-y: auto; }
-li {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px;
-    background: #f8fafc;
-    border-radius: 12px;
-    margin-bottom: 8px;
-    font-size: 14px;
+  if (transactions.length === 0) {
+    listContainer.innerHTML = `
+            <tr id="empty-state">
+                <td colspan="5" class="empty-text">Belum ada data keuangan yang tercatat.</td>
+            </tr>`;
+    return;
+  }
+
+  [...transactions].reverse().forEach((trx) => {
+    const row = document.createElement("tr");
+
+    const isIncome = trx.type === "income";
+    const textColor = isIncome ? "text-income" : "text-expense";
+    const sign = isIncome ? "+" : "-";
+
+    row.innerHTML = `
+            <td>${trx.date}</td>
+            <td style="font-weight: 600; text-transform: capitalize;">${trx.description}</td>
+            <td>${trx.category || "Umum"}</td>
+            <td class="text-right ${textColor}">${sign} ${formatRupiah(trx.amount)}</td>
+            <td class="text-center">
+                <button onclick="deleteTransaction(${trx.id})" class="delete-btn">✕</button>
+            </td>
+        `;
+    listContainer.appendChild(row);
+  });
 }
-.li-title { font-weight: 600; }
-.li-sub { font-size: 11px; color: #94a3b8; }
-.li-amount { font-weight: 700; display: flex; align-items: center; gap: 8px; }
-.btn-delete {
-    background: none;
-    border: none;
-    color: #cbd5e1;
-    cursor: pointer;
-    font-size: 16px;
-    padding: 0;
+
+function saveData() {
+  localStorage.setItem("transactions", JSON.stringify(transactions));
+  localStorage.setItem("targetSaving", targetSaving);
+  updateDashboard();
+  renderList();
 }
-.btn-delete:hover { color: var(--danger); }
+
+// Menyimpan Target Rupiah Baru
+saveTargetBtn.addEventListener("click", function () {
+  const val = parseFloat(targetAmountInput.value);
+  if (val > 0) {
+    targetSaving = val;
+    saveData();
+    targetAmountInput.value = "";
+    alert("Target Tabungan berhasil diperbarui!");
+  }
+});
+
+// Submit Transaksi Baru
+form.addEventListener("submit", function (e) {
+  e.preventDefault();
+
+  const opsiTanggal = { day: "numeric", month: "short" };
+  const tanggalSekarang = new Date().toLocaleDateString("id-ID", opsiTanggal);
+
+  const newTrx = {
+    id: Date.now(),
+    type: typeInput.value,
+    description: descInput.value.trim(),
+    amount: parseFloat(amountInput.value),
+    category: categoryInput.value,
+    date: tanggalSekarang,
+  };
+
+  transactions.push(newTrx);
+  saveData();
+
+  descInput.value = "";
+  amountInput.value = "";
+});
+
+window.deleteTransaction = function (id) {
+  transactions = transactions.filter((trx) => trx.id !== id);
+  saveData();
+};
+
+clearAllBtn.addEventListener("click", function () {
+  if (confirm("Hapus seluruh data?")) {
+    transactions = [];
+    targetSaving = 0;
+    saveData();
+  }
+});
+
+// Jalankan saat startup halaman terbuka
+updateDashboard();
+renderList();
