@@ -1,142 +1,120 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dompetku - Catatan Keuangan & Foto Struk</title>
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dompetku - Catatan Keuangan Otomatis</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Mengimpor Library Tesseract OCR untuk membaca teks gambar -->
+    <script src="https://jsdelivr.net"></script>
+</head>
+<body>
+
     <div class="container">
-      <!-- Header -->
-      <header class="main-header">
-        <h1>CATATAN TABUNGAN</h1>
-        <p>
-          Catat otomatis pemasukan, pengeluaran, dan target tabungan Anda secara
-          real-time.
-        </p>
-      </header>
+        <!-- Header -->
+        <header class="main-header">
+            <h1>💰 CATATAN TABUNGAN</h1>
+            <p>Catat otomatis pemasukan, pengeluaran, dan target tabungan Anda secara real-time.</p>
+        </header>
 
-      <!-- Ringkasan Finansial (Cards) -->
-      <section class="cards-grid">
-        <div class="card card-income">
-          <p class="card-title">Total Pemasukan</p>
-          <h3 id="total-income">Rp 0</h3>
-        </div>
-        <div class="card card-expense">
-          <p class="card-title">Total Pengeluaran</p>
-          <h3 id="total-expense">Rp 0</h3>
-        </div>
-        <div class="card card-balance">
-          <p class="card-title">Sisa Saldo Tabungan</p>
-          <h3 id="balance">Rp 0</h3>
-        </div>
-      </section>
+        <!-- Ringkasan Finansial (Cards) -->
+        <section class="cards-grid">
+            <div class="card card-income">
+                <p class="card-title">Total Pemasukan</p>
+                <h3 id="total-income">Rp 0</h3>
+            </div>
+            <div class="card card-expense">
+                <p class="card-title">Total Pengeluaran</p>
+                <h3 id="total-expense">Rp 0</h3>
+            </div>
+            <div class="card card-balance">
+                <p class="card-title">Sisa Saldo Tabungan</p>
+                <h3 id="balance">Rp 0</h3>
+            </div>
+        </section>
 
-      <!-- Fitur Target Tabungan -->
-      <section class="target-section">
-        <div class="target-header">
-          <span class="target-label">🎯 Target Tabungan</span>
-          <span id="target-percentage" class="target-pct">0%</span>
-        </div>
-        <!-- Tempat memunculkan nominal uang target -->
-        <div id="target-nominal-display" class="target-nominal">
-          Target: Rp 0
-        </div>
+        <!-- Fitur Target Tabungan -->
+        <section class="target-section">
+            <div class="target-header">
+                <span class="target-label">🎯 Target Tabungan</span>
+                <span id="target-percentage" class="target-pct">0%</span>
+            </div>
+            <div id="target-nominal-display" class="target-nominal">Target: Rp 0</div>
+            
+            <div class="progress-bar-bg">
+                <div id="target-progress" class="progress-bar-fill"></div>
+            </div>
+            <div class="target-input-group">
+                <input type="number" id="target-amount-input" placeholder="Set target rupiah (cth: 1000000)">
+                <button id="save-target-btn">Simpan</button>
+            </div>
+        </section>
 
-        <!-- Progress Bar Target -->
-        <div class="progress-bar-bg">
-          <div id="target-progress" class="progress-bar-fill"></div>
-        </div>
-        <!-- Form Set Target Rupiah -->
-        <div class="target-input-group">
-          <input
-            type="number"
-            id="target-amount-input"
-            placeholder="Set target rupiah (cth: 1000000)"
-          />
-          <button id="save-target-btn">Simpan</button>
-        </div>
-      </section>
+        <!-- Form Tambah Transaksi -->
+        <section class="form-section">
+            <h2>Tambah Transaksi Baru</h2>
+            <form id="transaction-form">
+                <div class="form-group">
+                    <input type="text" id="description" placeholder="Deskripsi (Contoh: Beli Bakso, Token Listrik)" required>
+                </div>
+                
+                <div class="form-row-flex">
+                    <input type="number" id="amount" min="1" placeholder="Jumlah (RP)" required>
+                    <select id="type" required>
+                        <option value="expense">Keluar (-)</option>
+                        <option value="income">Masuk (+)</option>
+                    </select>
+                </div>
 
-      <!-- Form Tambah Transaksi Baru -->
-      <section class="form-section">
-        <h2>Tambah Transaksi Baru</h2>
-        <form id="transaction-form">
-          <div class="form-group">
-            <input
-              type="text"
-              id="description"
-              placeholder="Deskripsi (Contoh: Gaji Bulanan, Beli Bakso)"
-              required
-            />
-          </div>
+                <div class="form-group">
+                    <select id="category" required>
+                        <option value="Umum / Lainnya">Kategori: Umum / Lainnya</option>
+                        <option value="Makanan">Kategori: Makanan & Minuman</option>
+                        <option value="Kebutuhan">Kategori: Kebutuhan Bulanan</option>
+                        <option value="Hiburan">Kategori: Hiburan / Hobi</option>
+                    </select>
+                </div>
 
-          <!-- Baris Gabungan: Jumlah Uang & Jenis Transaksi -->
-          <div class="form-row-flex">
-            <input
-              type="number"
-              id="amount"
-              min="1"
-              placeholder="Jumlah (RP)"
-              required
-            />
-            <select id="type" required>
-              <option value="income">Masuk (+)</option>
-              <option value="expense">Keluar (-)</option>
-            </select>
-          </div>
+                <!-- Bagian Upload Kamera / Galeri Struk -->
+                <div class="form-group-file">
+                    <label class="file-label">📷 Lampirkan Foto Struk (Otomatis Masuk Pengeluaran)</label>
+                    <input type="file" id="receipt-image" accept="image/*">
+                    <div id="ocr-status"></div>
+                </div>
 
-          <div class="form-group">
-            <select id="category" required>
-              <option value="Umum / Lainnya">Kategori: Umum / Lainnya</option>
-              <option value="Makanan">Kategori: Makanan & Minuman</option>
-              <option value="Kebutuhan">Kategori: Kebutuhan Bulanan</option>
-              <option value="Hiburan">Kategori: Hiburan / Hobi</option>
-            </select>
-          </div>
+                <button type="submit" class="submit-btn">Simpan Transaksi</button>
+            </form>
+        </section>
 
-          <!-- Kolom Upload Bukti Foto Struk -->
-          <div class="form-group-file">
-            <label class="file-label">📷 Lampirkan Foto Struk (Opsional)</label>
-            <input type="file" id="receipt-image" accept="image/*" />
-          </div>
-
-          <button type="submit" class="submit-btn">Simpan Transaksi</button>
-        </form>
-      </section>
-
-      <!-- Tabel Analisis Keuangan Panjang (Tema Biru Gelap / Excel Mode) -->
-      <section class="dark-table-section">
-        <div class="table-header-flex">
-          <h2>📊 Analisis Tabungan & Target</h2>
-          <button id="clear-all">Hapus Semua Data</button>
-        </div>
-
-        <div class="table-scroll-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th>Tanggal</th>
-                <th>Deskripsi Transaksi</th>
-                <th>Kategori</th>
-                <th>Struk</th>
-                <th class="text-right">Realisasi (Rp)</th>
-                <th class="text-center">Aksi</th>
-              </tr>
-            </thead>
-            <tbody id="transaction-list">
-              <tr id="empty-state">
-                <td colspan="6" class="empty-text">
-                  Belum ada data keuangan yang tercatat.
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
+        <!-- Tabel Analisis Keuangan Berdesain Gelap -->
+        <section class="dark-table-section">
+            <div class="table-header-flex">
+                <h2>📊 Analisis Tabungan & Target</h2>
+                <button id="clear-all">Hapus Semua Data</button>
+            </div>
+            
+            <div class="table-scroll-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tanggal</th>
+                            <th>Deskripsi Transaksi</th>
+                            <th>Kategori</th>
+                            <th>Struk</th>
+                            <th class="text-right">Realisasi (Rp)</th>
+                            <th class="text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transaction-list">
+                        <tr id="empty-state">
+                            <td colspan="6" class="empty-text">Belum ada data keuangan yang tercatat.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
     </div>
 
     <script src="script.js"></script>
-  </body>
+</body>
 </html>

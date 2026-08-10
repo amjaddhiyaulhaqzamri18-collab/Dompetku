@@ -84,7 +84,7 @@ body {
   color: #4f46e5;
 }
 
-/* Bagian Target Tabungan */
+/* Target Tabungan */
 .target-section {
   background: #eff6ff;
   padding: 16px;
@@ -154,7 +154,7 @@ body {
   background: #e68f00;
 }
 
-/* Form Transaksi */
+/* Form */
 .form-section {
   background: #ffffff;
   padding: 20px;
@@ -227,17 +227,33 @@ select:focus {
   cursor: pointer;
   font-size: 0.95rem;
 }
-.submit-btn:hover {
-  background: #3730a3;
+
+/* Status Loading Scanner */
+#ocr-status {
+  font-size: 0.75rem;
+  font-weight: bold;
+  margin-top: 5px;
+  transition: all 0.3s ease;
+}
+.loading-scan {
+  color: #ff9f00 !important;
+  animation: blink 1s infinite alternate;
+}
+@keyframes blink {
+  from {
+    opacity: 0.5;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
-/* Tabel Analisis Biru Gelap (Excel style) */
+/* Tabel Gaya Excel Gelap */
 .dark-table-section {
   background: #001f3d;
   padding: 20px;
   border-radius: 16px;
   color: white;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
 }
 .table-header-flex {
   display: flex;
@@ -260,9 +276,6 @@ select:focus {
   font-size: 0.75rem;
   font-weight: bold;
   cursor: pointer;
-}
-#clear-all:hover {
-  background: #dc2626;
 }
 .table-scroll-wrapper {
   overflow-x: auto;
@@ -312,7 +325,6 @@ tr:nth-child(even) {
   font-weight: bold;
 }
 
-/* Tombol Lihat Struk */
 .view-receipt-btn {
   background: #0284c7;
   color: white;
@@ -323,18 +335,10 @@ tr:nth-child(even) {
   font-weight: bold;
   cursor: pointer;
 }
-.view-receipt-btn:hover {
-  background: #0369a1;
-}
-
 .delete-btn {
   background: none;
   border: none;
   color: #ff4d4d;
   cursor: pointer;
   font-weight: bold;
-  font-size: 1rem;
-}
-.delete-btn:hover {
-  transform: scale(1.2);
 }
