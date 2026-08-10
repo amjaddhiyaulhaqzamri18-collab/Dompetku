@@ -1,150 +1,149 @@
-// Ikat DOM Element
-const form = document.getElementById("transaction-form");
-const descInput = document.getElementById("description");
-const amountInput = document.getElementById("amount");
-const typeInput = document.getElementById("type");
-const categoryInput = document.getElementById("category");
+// Inisialisasi Elemen HTML DOM
+const inputDeskripsi = document.getElementById("deskripsi");
+const inputJumlah = document.getElementById("jumlah");
+const inputTanggal = document.getElementById("tanggal");
+const selectKategori = document.getElementById("kategori");
+const btnSimpan = document.getElementById("btnSimpan");
+const btnResetTable = document.getElementById("btnResetTable");
+const tabelRiwayat = document.getElementById("tabelRiwayat");
 
-const totalIncomeEl = document.getElementById("total-income");
-const totalExpenseEl = document.getElementById("total-expense");
-const balanceEl = document.getElementById("balance");
-const listContainer = document.getElementById("transaction-list");
-const clearAllBtn = document.getElementById("clear-all");
+const txtPemasukan = document.getElementById("totalPemasukan");
+const txtPengeluaran = document.getElementById("totalPengeluaran");
+const txtSisaSaldo = document.getElementById("sisaSaldo");
 
-// Target Elements
-const targetAmountInput = document.getElementById("target-amount-input");
-const saveTargetBtn = document.getElementById("save-target-btn");
-const targetPercentageEl = document.getElementById("target-percentage");
-const targetProgressEl = document.getElementById("target-progress");
+const inputTarget = document.getElementById("inputTarget");
+const progressText = document.getElementById("progressText");
+const infoTargetAktif = document.getElementById("infoTargetAktif");
 
-// State Data (Local Storage)
-let transactions = JSON.parse(localStorage.getItem("transactions")) || [];
-let targetSaving = parseFloat(localStorage.getItem("targetSaving")) || 0;
+// Set tanggal default ke hari ini
+const hariIni = new Date().toISOString().split("T");
+inputTanggal.value = hariIni;
 
-function formatRupiah(angka) {
-  return new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    minimumFractionDigits: 0,
-  }).format(angka);
-}
+// Memuat data dari LocalStorage agar tidak hilang saat refresh
+let daftarTransaksi =
+  JSON.parse(localStorage.getItem("riwayat_keuangan")) || [];
+let targetTabungan =
+  parseFloat(localStorage.getItem("target_tabungan")) || 1000000;
 
-// Update Dashboard Angka Utama dan Bar Target Progress
-function updateDashboard() {
-  let totalIncome = 0;
-  let totalExpense = 0;
+// Set nilai awal kolom input target sesuai data tersimpan
+inputTarget.value = targetTabungan;
 
-  transactions.forEach((trx) => {
-    if (trx.type === "income") {
-      totalIncome += trx.amount;
-    } else {
-      totalExpense += trx.amount;
-    }
-  });
+// Fungsi Menghitung Seluruh Saldo, Target, dan Memperbarui Tampilan UI
+function hitungDanRenderUlang() {
+  let totalPemasukan = 0;
+  let totalPengeluaran = 0;
 
-  const currentBalance = totalIncome - totalExpense;
+  tabelRiwayat.innerHTML = "";
 
-  totalIncomeEl.textContent = formatRupiah(totalIncome);
-  totalExpenseEl.textContent = formatRupiah(totalExpense);
-  balanceEl.textContent = formatRupiah(currentBalance);
-
-  // Hitung Persentase Target Tabungan dari Sisa Saldo saat ini
-  if (targetSaving > 0 && currentBalance > 0) {
-    let pct = Math.min(Math.round((currentBalance / targetSaving) * 100), 100);
-    targetPercentageEl.textContent = pct + "%";
-    targetProgressEl.style.width = pct + "%";
+  if (daftarTransaksi.length === 0) {
+    tabelRiwayat.innerHTML = `
+            <tr id="rowKosong">
+                <td colspan="4" class="empty-row">Belum ada data keuangan yang tercatat</td>
+            </tr>
+        `;
   } else {
-    targetPercentageEl.textContent = "0%";
-    targetProgressEl.style.width = "0%";
+    daftarTransaksi.forEach((item) => {
+      if (item.kategori === "Pemasukan") {
+        totalPemasukan += item.jumlah;
+      } else {
+        totalPengeluaran += item.jumlah;
+      }
+
+      const baris = document.createElement("tr");
+      const opsiTanggal = { day: "2-digit", month: "2-digit", year: "numeric" };
+      const tglFormat = new Date(item.tanggal).toLocaleDateString(
+        "id-ID",
+        opsiTanggal,
+      );
+      const warnaTeks = item.kategori === "Pemasukan" ? "#6ee7b7" : "#fca5a5";
+
+      baris.innerHTML = `
+                <td>${tglFormat}</td>
+                <td>${item.deskripsi}</td>
+                <td>${item.kategori}</td>
+                <td style="color: ${warnaTeks}; font-weight: bold;">Rp ${item.jumlah.toLocaleString("id-ID")}</td>
+            `;
+      tabelRiwayat.appendChild(baris);
+    });
   }
+
+  const sisaSaldo = totalPemasukan - totalPengeluaran;
+
+  // Tampilkan data kalkulasi di kotak ringkasan atas
+  txtPemasukan.innerText = `Rp ${totalPemasukan.toLocaleString("id-ID")}`;
+  txtPengeluaran.innerText = `Rp ${totalPengeluaran.toLocaleString("id-ID")}`;
+  txtSisaSaldo.innerText = `Rp ${sisaSaldo.toLocaleString("id-ID")}`;
+
+  // Tampilkan nilai target aktif saat ini
+  infoTargetAktif.innerText = `Rp ${targetTabungan.toLocaleString("id-ID")}`;
+
+  // Hitung Persentase Progress Lingkaran
+  let persentase = 0;
+  if (targetTabungan > 0 && sisaSaldo > 0) {
+    persentase = Math.round((sisaSaldo / targetTabungan) * 100);
+  }
+  if (persentase > 100) persentase = 100;
+  if (persentase < 0) persentase = 0;
+
+  progressText.innerText = `${persentase}%`;
 }
 
-// Render isi list tabel bawah
-function renderList() {
-  listContainer.innerHTML = "";
+// BARU: Event Listener 'input' untuk mendeteksi perubahan target secara langsung (real-time)
+inputTarget.addEventListener("input", function () {
+  const nilaiBaru = parseFloat(inputTarget.value);
 
-  if (transactions.length === 0) {
-    listContainer.innerHTML = `
-            <tr id="empty-state">
-                <td colspan="5" class="empty-text">Belum ada data keuangan yang tercatat.</td>
-            </tr>`;
+  // Jika kolom dikosongkan atau diisi angka tidak valid, set sementara ke 0 agar tidak merusak rumus persen
+  if (!isNaN(nilaiBaru) && nilaiBaru >= 0) {
+    targetTabungan = nilaiBaru;
+  } else {
+    targetTabungan = 0;
+  }
+
+  // Simpan otomatis ke penyimpanan browser setiap kali angka diketik
+  localStorage.setItem("target_tabungan", targetTabungan);
+
+  // Langsung update layar tanpa perlu klik tombol simpan target lagi
+  hitungDanRenderUlang();
+});
+
+// Tombol Simpan Transaksi Baru ke Tabel
+btnSimpan.addEventListener("click", function () {
+  const deskripsi = inputDeskripsi.value.trim();
+  const jumlah = parseFloat(inputJumlah.value);
+  const tanggal = inputTanggal.value;
+  const kategori = selectKategori.value;
+
+  if (deskripsi === "" || isNaN(jumlah) || jumlah <= 0 || tanggal === "") {
+    alert("Harap isi deskripsi, nominal jumlah uang, dan tanggal transaksi!");
     return;
   }
 
-  [...transactions].reverse().forEach((trx) => {
-    const row = document.createElement("tr");
-
-    const isIncome = trx.type === "income";
-    const textColor = isIncome ? "text-income" : "text-expense";
-    const sign = isIncome ? "+" : "-";
-
-    row.innerHTML = `
-            <td>${trx.date}</td>
-            <td style="font-weight: 600; text-transform: capitalize;">${trx.description}</td>
-            <td>${trx.category || "Umum"}</td>
-            <td class="text-right ${textColor}">${sign} ${formatRupiah(trx.amount)}</td>
-            <td class="text-center">
-                <button onclick="deleteTransaction(${trx.id})" class="delete-btn">✕</button>
-            </td>
-        `;
-    listContainer.appendChild(row);
-  });
-}
-
-function saveData() {
-  localStorage.setItem("transactions", JSON.stringify(transactions));
-  localStorage.setItem("targetSaving", targetSaving);
-  updateDashboard();
-  renderList();
-}
-
-// Menyimpan Target Rupiah Baru
-saveTargetBtn.addEventListener("click", function () {
-  const val = parseFloat(targetAmountInput.value);
-  if (val > 0) {
-    targetSaving = val;
-    saveData();
-    targetAmountInput.value = "";
-    alert("Target Tabungan berhasil diperbarui!");
-  }
-});
-
-// Submit Transaksi Baru
-form.addEventListener("submit", function (e) {
-  e.preventDefault();
-
-  const opsiTanggal = { day: "numeric", month: "short" };
-  const tanggalSekarang = new Date().toLocaleDateString("id-ID", opsiTanggal);
-
-  const newTrx = {
-    id: Date.now(),
-    type: typeInput.value,
-    description: descInput.value.trim(),
-    amount: parseFloat(amountInput.value),
-    category: categoryInput.value,
-    date: tanggalSekarang,
+  const transaksiBaru = {
+    id: +new Date(),
+    deskripsi: deskripsi,
+    jumlah: jumlah,
+    tanggal: tanggal,
+    kategori: kategori,
   };
 
-  transactions.push(newTrx);
-  saveData();
+  daftarTransaksi.push(transaksiBaru);
+  localStorage.setItem("riwayat_keuangan", JSON.stringify(daftarTransaksi));
 
-  descInput.value = "";
-  amountInput.value = "";
+  hitungDanRenderUlang();
+
+  inputDeskripsi.value = "";
+  inputJumlah.value = "";
+  inputTanggal.value = hariIni;
 });
 
-window.deleteTransaction = function (id) {
-  transactions = transactions.filter((trx) => trx.id !== id);
-  saveData();
-};
-
-clearAllBtn.addEventListener("click", function () {
-  if (confirm("Hapus seluruh data?")) {
-    transactions = [];
-    targetSaving = 0;
-    saveData();
+// Tombol Hapus Semua Riwayat Data Tabel
+btnResetTable.addEventListener("click", function () {
+  if (confirm("Apakah Anda yakin ingin menghapus seluruh data transaksi?")) {
+    daftarTransaksi = [];
+    localStorage.removeItem("riwayat_keuangan");
+    hitungDanRenderUlang();
   }
 });
 
-// Jalankan saat startup halaman terbuka
-updateDashboard();
-renderList();
+// Jalankan kalkulasi data awal saat pertama kali web dibuka
+hitungDanRenderUlang();

@@ -3,126 +3,123 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dompetku - Catatan Keuangan</title>
+    <title>Catatan Keuangan Aplikasi</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <div class="container">
-      <!-- Header -->
-      <header class="main-header">
-        <h1>💰 CATATAN KEUANGAN</h1>
-        <p>
-          Catat otomatis pemasukan, pengeluaran, dan target tabungan Anda secara
-          real-time.
-        </p>
-      </header>
+      <h2>📊 CATATAN KEUANGAN</h2>
+      <p class="subtitle">
+        Catat otomatis pemasukan, pengeluaran, dan target tabungan Anda secara
+        real-time
+      </p>
 
-      <!-- Ringkasan Finansial (Cards) -->
-      <section class="cards-grid">
-        <div class="card card-income">
-          <p class="card-title">Total Pemasukan</p>
-          <h3 id="total-income">Rp 0</h3>
-        </div>
-        <div class="card card-expense">
-          <p class="card-title">Total Pengeluaran</p>
-          <h3 id="total-expense">Rp 0</h3>
-        </div>
-        <div class="card card-balance">
-          <p class="card-title">Sisa Saldo Tabungan</p>
-          <h3 id="balance">Rp 0</h3>
-        </div>
-      </section>
+      <!-- 1. Bagian Ringkasan Saldo Atas -->
+      <div class="summary-card pemasukan">
+        <div class="card-title">Total Pemasukan</div>
+        <div class="card-value" id="totalPemasukan">Rp 0</div>
+      </div>
 
-      <!-- Fitur Target Tabungan Baru -->
-      <section class="target-section">
-        <div class="target-header">
-          <span class="target-label">🎯 Target Tabungan</span>
-          <span id="target-percentage" class="target-pct">0%</span>
-        </div>
-        <!-- Progress Bar Target -->
-        <div class="progress-bar-bg">
-          <div id="target-progress" class="progress-bar-fill"></div>
-        </div>
-        <!-- Form Set Target Rupiah -->
-        <div class="target-input-group">
-          <input
-            type="number"
-            id="target-amount-input"
-            placeholder="Set target rupiah (cth: 1000000)"
-          />
-          <button id="save-target-btn">Simpan</button>
-        </div>
-      </section>
+      <div class="summary-card pengeluaran">
+        <div class="card-title">Total Pengeluaran</div>
+        <div class="card-value" id="totalPengeluaran">Rp 0</div>
+      </div>
 
-      <!-- Form Tambah Transaksi Baru -->
-      <section class="form-section">
-        <h2>Tambah Transaksi Baru</h2>
-        <form id="transaction-form">
-          <div class="form-group">
-            <input
-              type="text"
-              id="description"
-              placeholder="Deskripsi (Contoh: Gaji Bulanan, Beli Bakso)"
-              required
-            />
+      <div class="summary-card target-section">
+        <div>
+          <div class="card-title">Sisa Saldo Tabungan</div>
+          <div class="card-value" id="sisaSaldo">Rp 0</div>
+          <!-- Indikator Nominal Target Aktif yang Bisa Berubah-ubah -->
+          <div class="target-label-info">
+            Target Aktif: <span id="infoTargetAktif">Rp 1.000.000</span>
           </div>
-
-          <!-- Baris Gabungan: Jumlah Uang & Jenis Transaksi -->
-          <div class="form-row-flex">
-            <input
-              type="number"
-              id="amount"
-              min="1"
-              placeholder="Jumlah (RP)"
-              required
-            />
-            <select id="type" required>
-              <option value="income">Masuk (+)</option>
-              <option value="expense">Keluar (-)</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <select id="category">
-              <option value="Umum / Lainnya">Kategori: Umum / Lainnya</option>
-              <option value="Makanan">Kategori: Makanan & Minuman</option>
-              <option value="Kebutuhan">Kategori: Kebutuhan Bulanan</option>
-              <option value="Hiburan">Kategori: Hiburan / Hobi</option>
-            </select>
-          </div>
-
-          <button type="submit" class="submit-btn">Simpan Transaksi</button>
-        </form>
-      </section>
-
-      <!-- Tabel Analisis Keuangan Panjang (Tema Biru Gelap / Excel Mode) -->
-      <section class="dark-table-section">
-        <div class="table-header-flex">
-          <h2>📊 Analisis Tabungan & Target</h2>
-          <button id="clear-all">Hapus Semua Data</button>
         </div>
-
-        <div class="table-scroll-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th>Tanggal</th>
-                <th>Deskripsi Transaksi</th>
-                <th>Kategori</th>
-                <th class="text-right">Realisasi (Rp)</th>
-                <th class="text-center">Aksi</th>
-              </tr>
-            </thead>
-            <tbody id="transaction-list">
-              <tr id="empty-state">
-                <td colspan="5" class="empty-text">
-                  Belum ada data keuangan yang tercatat.
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="progress-container">
+          <div class="progress-ring" id="progressRing">
+            <span class="progress-text" id="progressText">0%</span>
+          </div>
+          <div class="card-title" style="margin-top: 5px; font-size: 10px">
+            Tabungan
+          </div>
         </div>
-      </section>
+      </div>
+
+      <!-- Kotak Pengaturan Target Tabungan (Bisa diubah kapan saja) -->
+      <div class="target-input-box">
+        <label for="inputTarget">Ubah Target Rupiah:</label>
+        <input
+          type="number"
+          id="inputTarget"
+          value="1000000"
+          placeholder="Ketik nominal target baru"
+        />
+      </div>
+
+      <hr
+        style="border: 0; border-top: 1px dashed #cbd5e0; margin-bottom: 20px"
+      />
+
+      <!-- 2. Form Input Tambah Transaksi Baru -->
+      <h3>Tambah Transaksi Baru</h3>
+
+      <div class="form-group">
+        <label for="deskripsi"
+          >Deskripsi (Contoh: Gaji, Jajan, Sembako, Beli Gawai)</label
+        >
+        <input
+          type="text"
+          id="deskripsi"
+          placeholder="Masukkan nama transaksi"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="jumlah">Jumlah (Rp)</label>
+        <input type="number" id="jumlah" placeholder="Masukkan angka nominal" />
+      </div>
+
+      <div class="form-group">
+        <label for="tanggal">Tanggal Transaksi</label>
+        <input type="date" id="tanggal" />
+      </div>
+
+      <div class="form-group">
+        <label for="kategori">Kategori</label>
+        <select id="kategori">
+          <option value="Pemasukan">Pemasukan (+)</option>
+          <option value="Pengeluaran">Pengeluaran (-)</option>
+        </select>
+      </div>
+
+      <button class="btn-simpan" id="btnSimpan">Simpan Transaksi</button>
+
+      <!-- 3. Tabel Analisis Riwayat Transaksi (Biru Tua) -->
+      <div class="table-container">
+        <h3>
+          <span>📊 Analisis Tabungan & Target</span>
+          <button class="btn-reset-table" id="btnResetTable">
+            Hapus Semua
+          </button>
+        </h3>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Tanggal</th>
+              <th>Deskripsi Transaksi</th>
+              <th>Kategori</th>
+              <th>Nominal (Rp)</th>
+            </tr>
+          </thead>
+          <tbody id="tabelRiwayat">
+            <tr id="rowKosong">
+              <td colspan="4" class="empty-row">
+                Belum ada data keuangan yang tercatat
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <script src="script.js"></script>
